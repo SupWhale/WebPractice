@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>메인</title>
+    <link rel="stylesheet" href="src\bootstrap-3.3.2-dist\css\bootstrap.css">
+    <style>
+      @media (min-width: 768px){
+        .contianer{
+          width: 750px;
+        }
+      }
+      @media (min-width: 992px){
+        .contianer{
+          width: 970px;
+        }
+      }
+      @media (min-width: 1200px){
+        .contianer{
+          width: 1170px;
+        }
+      }
+      .list table{ 
+        margin-top: 50px;       /*표 제목줄에 대한 스타일 입니다.*/
+      }
+      .number button{ 
+        width: 80px;
+        margin: auto;
+        display: inline-block;    /*페이징 버튼들의 가로 정렬을 위한 스타일입니다.*/
+      }
+      .write button{
+        width: 80px;
+        margin: auto;             /*글쓰기 버튼을 위한 가로 정렬 스타일입니다.*/
+        display: inline-block;
+      }
+
+ 
+      .contentList tr:hover{ background-color: beige;}
+    </style>
+    <script src="src\jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+        function Write(){
+          const url = window.location.href;
+          const urlParams = window.location.search; //글쓰기 페이지로부터 받아온 get Prameter들
+          var ParameterIs = (urlParams.slice(urlParams.indexOf("?")+1, url.length)); //Prameter 추출
+          if(ParameterIs != ""){
+            var PramList = ParameterIs.split('&');
+            var today = new Date();
+            var DateIs = {'year': today.getFullYear(), 'month': today.getMonth()+1, 'date': today.getDate()}; // 작성일자 생성
+            var read_count = Math.floor(Math.random() * 10)+1;    //임의의 조회수 생성
+            var title = PramList[0].slice(PramList[0].indexOf("=")+1, PramList[0].length); 
+            var type = PramList[1].slice(PramList[1].indexOf("=")+1, PramList[1].length);
+            if(type == 3){
+              $('.contentList table').append("<tr><td width="+"10%"+"><strong>공지</strong></td>"                      //새로운 글 생성
+              +"<td>"+"<a href=#><strong>"+title+"</strong></td>" 
+              +"<td width="+"10%"+" align="+"center"+"><strong>Admin</strong></td>"
+              +"<td width="+"10%"+" align="+"center"+"><strong>"+DateIs['year']+".0"+DateIs['month']+"."+DateIs['date']+"</strong></td>"
+              +"<td width="+"10%"+" align="+"center"+"><strong>"+read_count+"</strong></td></tr>");
+            }else{
+              $('.contentList table').append("<tr><td width="+"10%"+"></td>"                      //새로운 글 생성
+              +"<td>"+"<a href=#>"+title+"</td>" 
+              +"<td width="+"10%"+" align="+"center"+">Admin</td>"
+              +"<td width="+"10%"+" align="+"center"+">"+DateIs['year']+".0"+DateIs['month']+"."+DateIs['date']+"</td>"
+              +"<td width="+"10%"+" align="+"center"+">"+read_count+"</td></tr>");
+            }    
+          }
+        }
+    
+        function setPage(){
+          var PageNo = Math.ceil($('.contentList table tr').length/5); //전체 글 개수 처리
+          $('.number').append("<button class="+"list-group-item"+" onclick="+"PageStep(1)"+" value="+"이전"+">이전</button>");
+          for(var i=1; i<=PageNo; i++){
+            if(i == PageNo){
+              $('.number').append("<button id="+i+" class="+"list-group-item"+" onclick="+"MakePage("+i+")"+" href=#>"+i+"</button>"); //전체 글 개수 나누기 10한 값으로 목록 번호 생성			    
+            }
+            else {
+              $('.number').append("<button id="+i+" class="+"list-group-item"+" onclick="+"MakePage("+i+")"+" href=#>"+i+"</button>&nbsp;"); //전체 글 개수 나누기 10한 값으로 목록 번호 생성			    
+            }
+          }
+          $('.number').append("<button class="+"list-group-item"+" onclick="+"PageStep(2)"+" value="+"다음"+">다음</button>");
+          $('#'+1).addClass("active");  //페이지 최초 로딩시 첫번째 자식에 active 클래스 생성
+          MakePage($('.active').text());    
+        }
+        
+        function MakePage(value){
+          $('.contentList table tr').hide();                   //모든 테이블 숨김 처리
+          var start = (value-1)*5;               //출력될 글의 시작점과 끝지점 처리
+          var end = value*5;
+          var result = $('.active').text();
+          $('.active').removeClass();
+          $('#'+result).addClass('list-group-item');
+          $('#'+value).addClass('list-group-item active');  
+          for(var i=start; i<end; i++){ $('.contentList table tr').eq(i).show();}          //지정된 글 출력        
+        }
+
+        function PageStep(option){
+          var answer = $('.active').text();
+          var PageNo = Math.ceil($('.table tr').length/5); //전체 글 개수 처리
+          var result;
+          if(option == 1){result = parseInt(answer)-1;  }
+          else {result = parseInt(answer)+1; }
+
+          if(result <= 0){
+              alert("첫번째 페이지입니다!");
+              result = 1;                        
+              return
+            }
+          else if(result > PageNo){
+             result = PageNo;
+             alert("마지막 페이지입니다!");
+             return; 
+            }
+            MakePage(result);
+        }
+        function searchTitle(keyword){
+          $('.contentList table tr').hide();
+          let arr = $('.title').text().split(' ');
+          for(var i=0; i<$('.table tr').length; i++){
+            if(arr[i] == keyword || arr[i].includes(keyword)){
+              $('.contentList table tr').eq(i).show();
+            }
+          }
+        }
+
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row" >
+          <div class="list" align="center">
+            <!--글 목록을 불러오는 표입니다.-->
+            <table class="table table-bordered" width="2000">
+                <tr>
+                  <td width="10%"></td>
+                  <td align="center"><strong>제목</strong></td>
+                  <td width="10%" align="center"><strong>작성자</strong></td>
+                  <td width="10%" align="center"><strong>작성일</strong></td>
+                  <td width="10%" align="center"><strong>조회수</strong></td>
+                </tr>
+            </table>
+              
+          </div>
+          <div class="contentList">
+            <table class="table table-bordered" width="2000">
+                <tr> 
+                  <td width="10%" align="center"><strong>공지</strong></td>
+                  <td><a class="title" href="list1\listView.html"><strong>Notice</strong></a></td>
+                  <td width="10%" align="center"><strong>Admin</td>
+                  <td width="10%" align="center"><strong>2022.02.21</td>
+                  <td width="10%" align="center"><strong>3</td>
+                </tr>
+                <tr>
+                  <td width="10%"></td>
+                  <td><a class="title" href="list1\listView2.html"> wormhole</a></td>
+                  <td width="10%" align="center">Admin</td>
+                  <td width="10%" align="center">2022.02.22</td>
+                  <td width="10%" align="center">10</td>
+                </tr>
+                <tr>
+                  <td width="10%"></td>
+                  <td><a class="title" href="list1\listView3.html"> Report_Three</a></td>
+                  <td width="10%" align="center">Admin</td>
+                  <td width="10%" align="center">2022.02.23</td>
+                  <td width="10%" align="center">7</td>
+                </tr>
+                <tr>
+                  <td width="10%"></td>
+                  <td><a class="title" href="list1\listView4.html"> Report_Four</a></td>
+                  <td width="10%" align="center">Admin</td>
+                  <td width="10%" align="center">2022.02.24</td>
+                  <td width="10%" align="center">2</td>
+                </tr>
+                <tr>
+                  <td width="10%"></td>
+                  <td><a class="title" href="list1\listView5.html"> Report_Five</a></td>
+                  <td width="10%" align="center">Admin</td>
+                  <td width="10%" align="center">2022.02.210</td>
+                  <td width="10%" align="center">6</td>
+                </tr>
+                <tr>
+                  <td width="10%"></td>
+                  <td><a class="title" href="list2\listView6.html">Report_Six</a></td>
+                  <td width="10%" align="center">Admin</td>
+                  <td width="10%" align="center">2022.02.210</td>
+                  <td width="10%" align="center">12</td>
+                </tr>
+                <tr>
+                  <td width="10%"></td>
+                  <td><a class="title" href="list2\listView7.html">Report_Seven</a></td>
+                  <td width="10%" align="center">Admin</td>
+                  <td width="10%" align="center">2022.02.26</td>
+                  <td width="10%" align="center">10</td>
+                </tr>
+                <tr>
+                  <td width="10%"></td>
+                  <td><a class="title" href="list2\listView8.html">Report_Eight</a></td>
+                  <td width="10%" align="center">Admin</td>
+                  <td width="10%" align="center">2022.02.27</td>
+                  <td width="10%" align="center">2</td>
+                </tr>
+                <tr>
+                  <td width="10%"></td>
+                  <td><a class="title" href="list2\listView9.html">Report_Nine</a></td>
+                  <td width="10%" align="center">Admin</td>
+                  <td width="10%" align="center">2022.02.21</td>
+                  <td width="10%" align="center">4</td>
+                </tr>
+                <tr>
+                  <td width="10%"></td>
+                  <td><a class="title" href="list2\listView10.html">Report_Ten</a></td>
+                  <td width="10%" align="center">Admin</td>
+                  <td width="10%" align="center">2022.03.01</td>
+                  <td width="10%" align="center">20</td>
+                </tr>
+            </table> 
+      </div>
+      <table class="table write" width="2000">
+        <tr>
+          <td align="right">
+            <input id="searchBox" type="text">
+            <button class="list-group-item" type="button" onclick="searchTitle($('#searchBox').val())">검색</button>
+            <button class="list-group-item" onclick="location.href='listWrite.html';">글쓰기</button>
+          </td>
+        </tr>
+    </table>   
+    </div>
+  </div>
+    <div class="page">
+        <div class="text-center">
+          <ul class="list-group">
+            <div class="number">
+  
+            </div>
+          </ul>
+      </div>
+    </div>
+   <script>
+      Write(); 
+      setPage();
+   </script>
+  </body>
+</html>
